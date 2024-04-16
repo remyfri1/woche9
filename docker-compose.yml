@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: some-postgres
+    environment:
+      POSTGRES_USER: drupaluser
+      POSTGRES_PASSWORD: drupalpass
+      POSTGRES_DB: drupaldb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - drupal-network
+    restart: always
+
+  drupal:
+    image: drupal:latest
+    container_name: some-drupal
+    depends_on:
+      - postgres
+    ports:
+      - "8080:80"
+    environment:
+      DRUPAL_DB_HOST: some-postgres
+      DRUPAL_DB_USER: drupaluser
+      DRUPAL_DB_PASSWORD: drupalpass
+      DRUPAL_DB_NAME: drupaldb
+    volumes:
+      - drupal_modules:/var/www/html/modules
+      - drupal_profiles:/var/www/html/profiles
+      - drupal_themes:/var/www/html/themes
+      - drupal_sites:/var/www/html/sites
+    networks:
+      - drupal-network
+    restart: always
+
+volumes:
+  postgres_data:
+  drupal_modules:
+  drupal_profiles:
+  drupal_themes:
+  drupal_sites:
+
+networks:
+  drupal-network:
+    driver: bridge
